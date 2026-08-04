@@ -1,3 +1,5 @@
+#@utor Act. Alejandro Alberto García de León Jiménez
+#Auditoría interna
 setwd("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Insumos")
 library(shiny)
 #library(RiesgoProducto)
