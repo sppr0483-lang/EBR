@@ -98,3 +98,41 @@ Cruzar_Zona_geo =  function(Base1,Y, Llave_paz){
 #####################################
 ######INSUMO CON FACTOR DE RIESGO
 X=Cruzar_Zona_geo(X,Y, Llave_paz)
+#################################
+#####################
+#####################
+#####################
+############################
+#######FACTOR DE RIESGO MONTO
+################################
+Asignar_Riesgo_Monto <- function(X, tipo_cambio){
+  
+  niveles <- list(
+    c(2500, 7500),
+    tipo_cambio * c(2500, 7500)
+  )
+  
+  X$RiesgoMonto <- "0"
+  
+  for(i in 1:nrow(X)){
+    
+    if(X$Moneda[i] == 20){
+      k <- niveles[[1]]
+    } else {
+      k <- niveles[[2]]
+    }
+    
+    if(X$MontoOperacion[i] < k[1]){
+      X$RiesgoMonto[i] <- "B"
+      
+    } else if(X$MontoOperacion[i] <= k[2]){
+      X$RiesgoMonto[i] <- "M"
+      
+    } else {
+      X$RiesgoMonto[i] <- "A"
+    }
+  }
+  
+  return(X)
+}
+Z = Asignar_Riesgo_Monto(X,20)
