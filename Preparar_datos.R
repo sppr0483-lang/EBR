@@ -1,4 +1,5 @@
-
+#@utor Act. Alejandro Alberto García de León Jiménez
+#Auditoría interna
 #' Preparar datos2#'
 #' #' @return M#' @export
 Generador_X = function(n){
