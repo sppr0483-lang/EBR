@@ -1,5 +1,6 @@
 #@utor Act. Alejandro Alberto García de León Jiménez
 #Auditoría interna
+#Cambiar directorio según el entorno de trabajo a usar
 setwd("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Insumos")
 library(shiny)
 #library(RiesgoProducto)
