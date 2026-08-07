@@ -1,3 +1,6 @@
+#@utor Act. Alejandro Alberto García de León Jiménez
+#Auditoría interna
+###Se definen librerias y llaves
 library(dplyr)
 library(readr)
 library(readxl)
