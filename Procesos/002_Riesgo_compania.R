@@ -1,7 +1,7 @@
 library(dplyr)
 library(readr)
 library(readxl)
-source("Funciones_principales.R")
+source("Funciones_EBR.R")
 #####Se carga la plantilla proporcionada por las áreas relacionadas 
 #CarteraSegurosSimulada <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/CarteraSegurosSimulada1.csv")
 CarteraSegurosSimulada <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Layout_ok1.csv", 
