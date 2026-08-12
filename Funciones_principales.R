@@ -6,6 +6,21 @@ library(readr)
 library(readxl)
 ##Código con las principales funciones aplicadas
 #######################################
+#Periodo
+filtrado_periodo_C = function(CarteraSegurosSimulada,corte1,corte2){
+  if(corte1>corte2){
+    print("fechas de corte inconsistentes")
+    break
+  }else{
+  S = CarteraSegurosSimulada%>%filter(corte1 <=`Fecha de Emisión` & `Fecha de Emisión` <=corte2)
+  }
+  return(S)
+}
+################################
+filtrado_periodo_Indiv= function(CarteraSegurosSimulada,corte){
+    S = CarteraSegurosSimulada%>%filter(`Fecha Inicio Vigencia`<= corte & corte <=`Fecha Fin Vigencia`)
+  return(S)
+}
 #######################################
 #####MACROVARIABLES
 ###Macrovariable para Fuente de los recursos
@@ -24,12 +39,8 @@ llave = c("FuenteRecursos"="FuenteRecursos")
 llave1 = c("MedioPago"="MedioPago")
 llave2 = c("Nacionalidad"="Nacionalidad")
 llave3 = c("Giro_Ocupacion"="Giro_Ocupacion")
-#####################################
-####################################
-#######################################
-###########FACTOR DE RIESGO CLIENTE
-##########################################
-############Funciones para calcular sub-factores de riesgo.
+########################
+#X = Sub_recursos(llave,Recursos,CarteraSegurosSimulada)
 Sub_recursos = function(llave,Recursos,CarteraSegurosSimulada){
   Recursos$riesgoRecursos = Recursos$orden/max(Recursos$orden)
   CarteraSegurosSimulada1 <- CarteraSegurosSimulada %>% left_join(select(Recursos, FuenteRecursos, riesgoRecursos),by = llave)
@@ -41,12 +52,11 @@ Sub_Forma_Pago = function(llave1,Forma_Pago,CarteraSegurosSimulada){
   CarteraSegurosSimulada1 <- X %>% left_join(select(Forma_Pago, MedioPago, riesgo_fPago),by = llave1)
   return(CarteraSegurosSimulada1)
 }
-##############
-##############
-####Aplicación de funciones anteriores
+
+#############3
 X = Sub_Forma_Pago(llave1,Forma_Pago,CarteraSegurosSimulada)
 #################
-################Sub-Factor Ocupación
+################
 #######################
 Plantilla_Ocupa <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Plantilla_ROcupacion.csv")
 ######SUBFACTOR OCUPACION
@@ -72,9 +82,10 @@ Importancia_clientes = function(X,orden1){
   Base$RiesgoCliente  = as.numeric(Riesgo)
   return(Base)
 }
+
 X = Importancia_clientes(X,orden1)
 ############################
-###########Agravante por edad
+############################
 ############Se requiere saber si es física o moral
 Persona = unique(CarteraSegurosSimulada["Tipo_Persona"])
 Agravador_const = function(CarteraSegurosSimulada){
@@ -107,9 +118,7 @@ Agravador_const = function(CarteraSegurosSimulada){
 X = Agravador_const(X)
 unique(X$riesgoRecursos)
 ########################
-########################
-#####Zona geográfica
-#######################
+#zona geográfica
 Base1 = X
 CZG = read_xlsx("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/EJECUTOR/Plantilla_riesgo_zona_geografica.xlsx")
 Indice_paz = read_excel("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/EJECUTOR/Plantilla_zona_geo.xlsx")
@@ -164,20 +173,15 @@ Asignar_Riesgo_ZG <- function(Indice_paz, CZG){
   return(Base1)
   
 }
-############################
-#############################Anexa al indice de paz el riesgozona geográfica
 Y = Asignar_Riesgo_ZG(Indice_paz, CZG)
 #write_csv(Y, "C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/EJECUTOR/Plantilla_ZG.csv")
-####################Asignar a X riesgo Zona geográfica
 Cruzar_Zona_geo =  function(Base1,Y, Llave_paz){
   Base1 = Base1 %>% left_join(select(Y, Clave, atributos),by = Llave_paz)
   return(Base1)
 }
 X=Cruzar_Zona_geo(X,Y, Llave_paz)
-########################################
-###################################Asignar riesgo zona geográfica de manera cuantitativa
 riesgos_ZonGeo = c(3,2,1)
-riesgos_ZonGeo = riesgos_mont/max(riesgos_mont)
+riesgos_ZonGeo = riesgos_ZonGeo/max(riesgos_ZonGeo)
 Diccionario_ZonaGeo =  c(
   "A"  = riesgos_ZonGeo[1],
   "M"   = riesgos_ZonGeo[2],
@@ -199,12 +203,8 @@ X$Riesgo_organized_crime_num= sapply(X$Riesgo_organized_crime, function(x){
 X$Riesgo_violent_crime_num= sapply(X$Riesgo_violent_crime, function(x){
   ifelse(!is.na(Diccionario_ZonaGeo[x]),Diccionario_ZonaGeo[x],0)
 })
-##############
-##############
 ###########
-#names(X)
-################Integración de todos los suriesgos en una sola medida
-##Importancia de zona geográfica
+names(X)
 ordenZG = c("RiesgoZG_num","Riesgo_organized_crime_num","Riesgo_homicide_num","Riesgo_firearms_crime_num","Riesgo_violent_crime_num")
 Importancia_ZG = function(X,ordenZG){
   Base = X
@@ -216,15 +216,13 @@ Importancia_ZG = function(X,ordenZG){
   Base$RiesgoZONA_GEOGRAFICA  = as.numeric(Riesgo)
   return(Base)
 }
+
 X = Importancia_ZG(X,ordenZG)
 #####################
 #####################
 #####################
 #######Factor Monto
-###########################
-###Si se desea importar la plantilla producto debe cambiarse esta ruta
 #Plantilla_producto = read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/EJECUTOR/Plantilla_RPRODUCTO.csv")
-##################Función que asigna graduación a riesgo monto
 Asignar_Riesgo_Monto <- function(X, tipo_cambio){
   
   niveles <- list(
@@ -256,7 +254,6 @@ Asignar_Riesgo_Monto <- function(X, tipo_cambio){
   return(X)
 }
 X= Asignar_Riesgo_Monto(X,20)
-###############Asignación de riesgo monto numérico
 riesgos_mont = c(3,2,1)
 riesgos_mont = riesgos_mont/max(riesgos_mont)
 Diccionario_Montos =  c(
@@ -268,7 +265,7 @@ X$RiesgoMonto_Num = sapply(X$RiesgoMonto, function(x){
   ifelse(!is.na(Diccionario_Montos[x]),Diccionario_Montos[x],0)
 })
 ##############
-#############ESTO ESTA PENDIENTE!!!!!!!!!!!!!!
+#############
 ##########Factor Riesgo Producto
 atributos1 = c("Grupo")
 RP = read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/Plantilla_RPRODUCTO.csv")
@@ -277,15 +274,125 @@ Cruzar_producto =  function(X,RP, Llave_producto,atributos1){
   Base1 = X %>% left_join(select(RP, `Registro NT`, atributos1),by = Llave_producto)
   return(Base1)
 }
-##############################
-###########################
 library(writexl)
 write_xlsx(X,"C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/REPORTE_DULCE_DEF.xlsx")
-Z=Cruzar_producto(X,RP, Llave_producto,atributos1)
-Casos = Z[which(is.na(Z$Grupo)),]
-str(Y[, c("RiesgoZG",
-          "Riesgo_firearms_crime",
-          "Riesgo_homicide")])
-unique(Casos$NotaTecnica)
-names(Y)
-Y$Riesgo_firearms_crime
+X=Cruzar_producto(X,RP, Llave_producto,atributos1)
+X$RiesgoProducto = X$Grupo/7
+X$RiesgoProducto = ifelse(!is.na(X$RiesgoProducto),X$RiesgoProducto,1)
+######################################
+######################################
+####Medida Global
+names(X)
+importanciaN = c("RiesgoCliente","RiesgoMonto_Num","RiesgoZONA_GEOGRAFICA","RiesgoProducto" )
+pesos  = c(4:1)
+pesos = pesos/sum(unique(pesos))
+EBR = as.matrix(X[,importanciaN],ncol=4)%*%as.matrix(pesos, ncol=1)
+EBR = as.data.frame(cbind(X,EBR))
+################
+#####################
+####################
+###Calificación  Global Global
+#############################
+############################
+#########Seleccionar nuestras EBR
+EBR_PREVIA = EBR
+################tomar el mayor riesgo global
+EBR_PREVIA = EBR_PREVIA%>%group_by(RFC)%>%
+summarise(EBR_F = max(EBR))%>% distinct()
+##############Primer filtrado, cruzar solo con los factores de interés
+##############Para cruzar por la izquierda
+EBR_1 = EBR%>%select(RFC,RiesgoCliente,RiesgoMonto_Num,RiesgoZONA_GEOGRAFICA,RiesgoProducto,EBR)%>%distinct
+###############Cruce por RFC y EBR_F
+EBR_PREVIA_DEF = EBR_PREVIA%>%left_join(EBR_1, by = c("RFC"="RFC","EBR_F"="EBR"))%>%distinct
+######################Segundo filtrado si hubiera duplicados que por decimales
+######no se consideraran diferentes tomar filtrado sobre RFC y EBR_F
+EBR_PREVIA_DEF <- EBR_PREVIA_DEF %>%
+distinct(RFC, EBR_F, .keep_all = TRUE)
+unique(EBR$RFC)
+#######################################
+#######################################
+#OUTPUT FINAL EBR CONTIENE TODAS LAS EVALUACIONES
+####EBR_PREVIA_DEF CONTIENE LAS EVALUACIONES POR CLIENTE.
+############################
+############################
+####
+EBR_NIVELES = function(EBR_PREVIA_DEF){
+  x1 = c(.40,.80,1)
+  y1 = EBR_PREVIA_DEF$EBR_F
+  EBR_PREVIA_DEF$Cali_EBR = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  #################################
+  y1 = EBR_PREVIA_DEF$EBR_F
+  EBR_PREVIA_DEF$Cali_EBR = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  ##################################
+  y1 = EBR_PREVIA_DEF$RiesgoCliente
+  EBR_PREVIA_DEF$Cali_RiesgoCliente = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  #################################
+  y1 = EBR_PREVIA_DEF$RiesgoMonto_Num
+  EBR_PREVIA_DEF$Cali_RiesgoMonto = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y>x[2]){
+      return(1)
+    }
+  })
+  ################################
+  y1 = EBR_PREVIA_DEF$RiesgoZONA_GEOGRAFICA
+  EBR_PREVIA_DEF$Cali_RiesgoZONA_GEOGRAFICA = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  ########################################
+  y1 = EBR_PREVIA_DEF$RiesgoProducto
+  EBR_PREVIA_DEF$RiesgoProducto = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  #########################################
+  return(EBR_PREVIA_DEF)
+}
+##############################################################
+###############################################################
+####Calificacion de la compania
+Z = EBR_NIVELES(EBR_PREVIA_DEF)
+d = as.matrix(prop.table(table(Z$Cali_EBR)),ncol = 1)
+nom = t(as.matrix(as.numeric(rownames(d))))
+Calif = nom%*%d
+#############################################
+############################################
+############################################
