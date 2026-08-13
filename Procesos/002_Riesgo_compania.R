@@ -165,8 +165,8 @@ X$RiesgoMonto_Num = sapply(X$RiesgoMonto, function(x){
 atributos1 = c("Grupo")
 RP = read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/Plantilla_RPRODUCTO.csv")
 Llave_producto = c("NotaTecnica" ="Registro NT")
-library(writexl)
-write_xlsx(X,"C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/REPORTE_DULCE_DEF.xlsx")
+#library(writexl)
+#write_xlsx(X,"C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/REPORTE_DULCE_DEF.xlsx")
 X=Cruzar_producto(X,RP, Llave_producto,atributos1)
 X$RiesgoProducto = X$Grupo/7
 X$RiesgoProducto = ifelse(!is.na(X$RiesgoProducto),X$RiesgoProducto,1)
