@@ -223,3 +223,79 @@ EBR_PREVIA_DEF$Valuacion_I  =fecha_calif_1
 EBR_PREVIA_DEF$Valuacion_S  =fecha_calif_2
 ###############################################################
 ###############################################################
+EBR_PREVIA_DEF$Base = EBR_PREVIA_DEF$EBR_F + EBR_PREVIA_DEF$Calif_comp
+###############################################################
+###############################################################
+EBR_PREVIA_DEF$alpha_Cliente = EBR_PREVIA_DEF$EBR_F/EBR_PREVIA_DEF$Base
+EBR_PREVIA_DEF$alpha_Comp = EBR_PREVIA_DEF$Calif_comp/EBR_PREVIA_DEF$Base
+EBR_PREVIA_DEF$CALIFI_COMP_EBR = (EBR_PREVIA_DEF$alpha_Cliente*EBR_PREVIA_DEF$EBR_F) + (EBR_PREVIA_DEF$alpha_Comp*EBR_PREVIA_DEF$Calif_comp)
+EBR_FINAL = EBR_PREVIA_DEF
+#######################SE ALMACENA LA PRIMERA VALUACIÓN
+#####################MUY IMPORTANTE ANTES DE CONTINUAR
+EBR_FINAL$EBR_F_inicial = EBR_FINAL$EBR_F
+EBR_FINAL$EBR_F = EBR_FINAL$CALIFI_COMP_EBR
+#########Niveles finales
+EBR_FINAL = EBR_NIVELES(EBR_FINAL)
+#######################################
+#######################################
+#############################################
+############################################
+############################################
+rutasalidas =  "C:/Users/agarciadeleon/OneDrive - SPPIS/Escritorio/EBR_ACCESO DIRECTO/Salidas/Clientes"
+#library(writexl)
+#write_xlsx(X,"C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/REPORTE_DULCE_DEF.xlsx")
+library(openxlsx)
+# Crear un workbook nuevo
+wb <- createWorkbook()
+df = data.frame(Calificacion = Calif,fecha_i = fecha_calif_1, fecha_f = fecha_calif_2)
+df$fecha_i = as.Date(df$fecha_i)
+df$fecha_f = as.Date( df$fecha_f)
+names(df) = c("Calificacion SPP", "fechaI", "fechaS")
+hoja <- "Calificacion_SPP"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = EBR_FINAL
+hoja <- "Evaluación EBR para clientes"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = EBR_PREVIA_DEF
+hoja <- "EBR_sin_niveles"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = Z
+hoja <- "Niveles_asignados_para_EBR"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = EBR
+hoja <- "Papell_de_trabajo_EBR"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = X
+hoja <- "PT_todas_variables"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = data.frame(Importancia=importanciaN, pesos = pesos)
+hoja <- "Papel_de_trabajo_importancia"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+###########################
+df = CarteraSegurosSimulada
+hoja <- "Layout"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+# Guardar el archivo Excel
+ruta_destino = paste(trimws(rutasalidas,which = "right"),"/calificacion.xlsx", sep ="")
+saveWorkbook(wb, ruta_destino, overwrite = TRUE)
+#####################################################
+####################################################
+Resultado = EBR%>%left_join(EBR_FINAL, by = c("RFC"="RFC"))
+library(writexl)
+ruta_destino = paste(trimws(rutasalidas,which = "right"),"/Resultado_clientes.xlsx", sep ="")
+write_xlsx(Resultado,ruta_destino)
+
