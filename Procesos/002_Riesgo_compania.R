@@ -13,7 +13,7 @@ CarteraSegurosSimulada <- read_csv(ruta1,
 ##########################Riesgo inherente
 corte1 = as.Date("2024/01/01")
 corte2 = as.Date("2024/12/31")
-#CarteraSegurosSimulada = filtrado_periodo_C(CarteraSegurosSimulada,corte1,corte2)
+CarteraSegurosSimulada = filtrado_periodo_C(CarteraSegurosSimulada,corte1,corte2)
 ##################################################
 ################################################
 ##########################PREPARACION DE LOS DATOS
