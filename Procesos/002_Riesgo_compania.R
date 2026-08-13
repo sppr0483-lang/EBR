@@ -66,14 +66,23 @@ unique(CarteraSegurosSimulada$FormaVenta)
 #######################################
 #####MACROVARIABLES
 ###Macrovariable para Fuente de los recursos
-Recursos = unique(CarteraSegurosSimulada["FuenteRecursos"])
-Recursos =  Recursos %>%arrange(FuenteRecursos)
-Recursos$orden = c(4,4,1,2,3)
+rutaR = "Actual/Recursos.csv"
+Recursos = read.csv(rutaR)
+Recursos1 = unique(CarteraSegurosSimulada["FuenteRecursos"])
+Recursos1 =  Recursos1 %>%arrange(FuenteRecursos)
+Recursos
+Recursos$FuenteRecursos%>%intersect(Recursos1$FuenteRecursos)
+#Recursos1$orden = c(4,4,1,2,3)
+#write.csv(Recursos1,"Actual/Recursos.csv")
 ##################################
 ##Macrovariable para Forma de pago
-Forma_Pago = unique(CarteraSegurosSimulada["MedioPago"])
-Forma_Pago =  Forma_Pago %>%arrange(Forma_Pago)
-Forma_Pago$orden = c(3,3,3,3,2,1)
+rutaF = "Actual/F_pago.csv"
+Forma_Pago = read.csv(rutaF)
+Forma_Pago1 = unique(CarteraSegurosSimulada["MedioPago"])
+Forma_Pago1 =  Forma_Pago1 %>%arrange(Forma_Pago1)
+Forma_Pago$MedioPago%>%intersect(Forma_Pago1$MedioPago)
+#write.csv(Forma_Pago,"Actual/F_pago.csv")
+#Forma_Pago$orden = c(3,3,3,3,2,1)
 ##############################
 #############################################
 llave = c("FuenteRecursos"="FuenteRecursos")
