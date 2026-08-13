@@ -202,7 +202,7 @@ Cruzar_producto =  function(X,RP, Llave_producto,atributos1){
 ####
 ##Función 13
 EBR_NIVELES = function(EBR_PREVIA_DEF){
-  x1 = c(.40,.80,1)
+  x = c(.40,.80,1)
   y1 = EBR_PREVIA_DEF$EBR_F
   EBR_PREVIA_DEF$Cali_EBR = sapply(y1,function(y1){
     if(y1<=x[1]){
@@ -240,9 +240,9 @@ EBR_NIVELES = function(EBR_PREVIA_DEF){
   EBR_PREVIA_DEF$Cali_RiesgoMonto = sapply(y1,function(y1){
     if(y1<=x[1]){
       return(1/3)
-    }else if(y>= x[1] & y1<=x[2]){
+    }else if(y1>= x[1] & y1<=x[2]){
       return(2/3)
-    }else if(y>x[2]){
+    }else if(y1>x[2]){
       return(1)
     }
   })
