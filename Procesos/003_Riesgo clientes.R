@@ -11,7 +11,8 @@ fecha_calif_2 =  as.Date("2026/06/30")
 source("Funciones_principales.R")
 #####Se carga la plantilla proporcionada por las áreas relacionadas 
 #CarteraSegurosSimulada <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/CarteraSegurosSimulada1.csv")
-CarteraSegurosSimulada <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Layout_ok1.csv", 
+ruta1 = "Actual/Layout_ok1.csv"
+CarteraSegurosSimulada <- read_csv(ruta1, 
                                    col_types = cols(`Fecha de Emisión` = col_date(format = "%d/%m/%Y"), 
                                                     `Fecha Inicio Vigencia` = col_date(format = "%d/%m/%Y"), 
                                                     `Fecha Fin Vigencia` = col_date(format = "%d/%m/%Y")))
@@ -98,7 +99,8 @@ llave2 = c("Nacionalidad"="Nacionalidad")
 llave3 = c("Giro_Ocupacion"="Giro_Ocupacion")
 ########################
 X = Sub_Forma_Pago(llave1,Forma_Pago,CarteraSegurosSimulada)
-Plantilla_Ocupa <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Plantilla_ROcupacion.csv")
+ruta2 = "Actual/Plantilla_ROcupacion.csv"
+Plantilla_Ocupa <- read_csv(ruta2)
 numero_grupos=5
 X = Sub_Ocupacion(numero_grupos,llave3,Plantilla_Ocupa,X)
 #################
@@ -116,8 +118,10 @@ unique(X$riesgoRecursos)
 ########################
 #zona geográfica
 Base1 = X
-CZG = read_xlsx("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/EJECUTOR/Plantilla_riesgo_zona_geografica.xlsx")
-Indice_paz = read_excel("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/EJECUTOR/Plantilla_zona_geo.xlsx")
+ruta3 = "Actual/Plantilla_riesgo_zona_geografica.xlsx"
+CZG = read_xlsx(ruta3)
+ruta4 = "Actual/Plantilla_zona_geo.xlsx"
+Indice_paz = read_excel(ruta4)
 Llave_paz = c("Entidad1"="Clave")
 names(Indice_paz)
 atributos = c("Clave","RiesgoZG","Riesgo_firearms_crime","Riesgo_homicide","Riesgo_organized_crime","Riesgo_violent_crime" ) 
@@ -170,7 +174,8 @@ X$RiesgoMonto_Num = sapply(X$RiesgoMonto, function(x){
 #############
 ##########Factor Riesgo Producto
 atributos1 = c("Grupo")
-RP = read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/Plantilla_RPRODUCTO.csv")
+ruta5 = "Actual/Plantilla_RPRODUCTO.csv"
+RP = read_csv(ruta5)
 Llave_producto = c("NotaTecnica" ="Registro NT")
 #library(writexl)
 #write_xlsx(X,"C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/Riesgo_Producto/Bases/REPORTE_DULCE_DEF.xlsx")
