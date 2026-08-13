@@ -1,0 +1,109 @@
+---
+title: "004_Reportes"
+author: "Auditoría interna y operaciones"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+```{r warning=FALSE}
+library(readxl)
+ruta_Res = "C:/Users/agarciadeleon/OneDrive - SPPIS/Escritorio/EBR_ACCESO DIRECTO/Salidas/Clientes/Corrida_Junio_2025/Resultado_clientes_Junio_2025.xlsx"
+Resultado <- read_excel(ruta_Res)
+##Debe cargarse justo después de correr el proceso 003 la base Resultado
+head(Resultado)
+```
+```{r}
+##Deben generarse las tablas de contingencia
+#Agrupación por tipo de persona
+library(dplyr)
+Persona = Resultado%>%group_by(Cali_EBR, Tipo_Persona)%>%summarise(Total = n(), Distintos_RFC = n_distinct(RFC))
+Persona
+library(ggplot2)
+
+color_pf <- "skyblue3"
+color_pm <- "gold3"
+
+ggplot(Persona, aes(x = "", y = Total, fill = Tipo_Persona)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c(
+    "PF" = color_pf,
+    "PM" = color_pm
+  )) +
+  labs(
+    title = "Distribución por Tipo de Persona",
+    fill = "Tipo de Persona"
+  ) +
+  theme_void() +
+  theme(
+  
+  )
+
+```
+
+```{r}
+##Deben generarse las tablas de contingencia
+#Agrupación por tipo de persona
+library(dplyr)
+Producto = Resultado%>%group_by(Cali_EBR, Producto)%>%summarise(Total = n(), Distintos_RFC = n_distinct(RFC))
+Producto
+Producto$Producto <- as.factor(Producto$Producto)
+library(ggplot2)
+colores_corporativos <- hcl.colors(
+  n = 100,
+  palette = "Dark 3"
+)
+
+ggplot(Producto, aes(x = "", y = Total, fill = Producto)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(
+    values = setNames(
+      colores_corporativos[1:length(unique(Producto$Producto))],
+      unique(Producto$Producto)
+    )
+  ) +
+  labs(
+    title = "Distribución por Producto",
+    fill = "Producto"
+  ) +
+  theme_void() 
+```
+```{r}
+##Deben generarse las tablas de contingencia
+#Agrupación por tipo de persona
+library(dplyr)
+Zona = Resultado%>%group_by(Cali_EBR, EntidadRiesgo)%>%summarise(Total = n(), Distintos_RFC = n_distinct(RFC))
+Zona
+```
+```{r}
+##Deben generarse las tablas de contingencia
+#Agrupación por tipo de persona
+library(dplyr)
+Monto = Resultado%>%group_by(Cali_EBR, Cali_RiesgoMonto)%>%summarise(Total = n(), Distintos_RFC = n_distinct(RFC))
+Monto
+```
+```{r eval=FALSE, include=FALSE}
+library(openxlsx)
+rutasalidas =  "C:/Users/agarciadeleon/OneDrive - SPPIS/Escritorio/EBR_ACCESO DIRECTO/Salidas/Reportes/Historicos"
+# Crear un workbook nuevo
+wb <- createWorkbook()
+df = Persona
+hoja <- "Factor_persona"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+df = Producto
+hoja <- "Factor_Producto"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+df = Zona
+hoja <- "Factor_Zona"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+df = Monto
+hoja <- "Factor_Monto"
+addWorksheet(wb, hoja)
+writeData(wb, sheet = hoja, x = df)
+ruta_destino = paste(trimws(rutasalidas,which = "right"),"/Reporte_1.xlsx", sep ="")
+saveWorkbook(wb, ruta_destino, overwrite = TRUE)
+```
+
