@@ -259,7 +259,7 @@ EBR_NIVELES = function(EBR_PREVIA_DEF){
   })
   ########################################
   y1 = EBR_PREVIA_DEF$RiesgoProducto
-  EBR_PREVIA_DEF$RiesgoProducto = sapply(y1,function(y1){
+  EBR_PREVIA_DEF$Cali_RiesgoProducto = sapply(y1,function(y1){
     if(y1<=x[1]){
       return(1/3)
     }else if(y1>= x[1] & y1<=x[2]){
