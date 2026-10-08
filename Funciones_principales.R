@@ -271,6 +271,90 @@ EBR_NIVELES = function(EBR_PREVIA_DEF){
   #########################################
   return(EBR_PREVIA_DEF)
 }
+
+####
+##Función 14
+EBR_NIVELES2 = function(EBR_PREVIA_DEF){
+  x = c(.40,.80,1)
+  y1 = EBR_PREVIA_DEF$EBR_F
+  EBR_PREVIA_DEF$Cali_EBR = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  #################################
+  y1 = EBR_PREVIA_DEF$EBR_F
+  EBR_PREVIA_DEF$Cali_EBR = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  ##################################
+  y1 = EBR_PREVIA_DEF$RiesgoCliente
+  EBR_PREVIA_DEF$Cali_RiesgoCliente = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  #################################
+  y1 = EBR_PREVIA_DEF$RiesgoMonto_Num
+  EBR_PREVIA_DEF$Cali_RiesgoMonto = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  ################################
+  y1 = EBR_PREVIA_DEF$RiesgoZONA_GEOGRAFICA
+  EBR_PREVIA_DEF$Cali_RiesgoZONA_GEOGRAFICA = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  ########################################
+  y1 = EBR_PREVIA_DEF$RiesgoProducto
+  EBR_PREVIA_DEF$Cali_RiesgoProducto = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  ########################################
+  y1 = EBR_PREVIA_DEF$Calif_comp
+  EBR_PREVIA_DEF$Cali_Calif_comp = sapply(y1,function(y1){
+    if(y1<=x[1]){
+      return(1/3)
+    }else if(y1>= x[1] & y1<=x[2]){
+      return(2/3)
+    }else if(y1>x[2]){
+      return(1)
+    }
+  })
+  #########################################
+  return(EBR_PREVIA_DEF)
+}
 #############################################
 ############################################
 ############################################
