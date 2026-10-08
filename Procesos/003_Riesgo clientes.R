@@ -5,10 +5,11 @@
 library(dplyr)
 library(readr)
 library(readxl)
-calif = 0.5865418
-fecha_calif_1 = as.Date("2025/07/01")
-fecha_calif_2 =  as.Date("2026/06/30")
-source("Funciones_principales.R")
+calif = 0.545833333333333
+fecha_calif_1 = as.Date("2025/01/01")
+fecha_calif_2 =  as.Date("2025/12/31")
+source("C:/Users/agarciadeleon/OneDrive - SPPIS/Escritorio/EBR_ACCESO DIRECTO/Codigos/Funciones_principales.R")
+setwd("C:/Users/agarciadeleon/OneDrive - SPPIS/Escritorio/EBR_ACCESO DIRECTO/Codigos")
 #####Se carga la plantilla proporcionada por las áreas relacionadas 
 #CarteraSegurosSimulada <- read_csv("C:/Users/agarciadeleon/WPy64-38123/scripts/EBR/CarteraSegurosSimulada1.csv")
 ruta1 = "Actual/Layout_ok1.csv"
@@ -17,7 +18,7 @@ CarteraSegurosSimulada <- read_csv(ruta1,
                                                     `Fecha Inicio Vigencia` = col_date(format = "%d/%m/%Y"), 
                                                     `Fecha Fin Vigencia` = col_date(format = "%d/%m/%Y")))
 ##########################Riesgo por cliente
-corte = as.Date("2025/06/30")
+corte = as.Date("2026/06/30")
 CarteraSegurosSimulada = filtrado_periodo_Indiv(CarteraSegurosSimulada,corte)
 ###################
 ##################################################
@@ -62,6 +63,7 @@ CarteraSegurosSimulada$Nacionalidad = sapply(CarteraSegurosSimulada$Nacionalidad
   ifelse(!is.na(diccionario_nacionalidad[x]),diccionario_nacionalidad[x],x)
 })
 unique(CarteraSegurosSimulada$Nacionalidad)
+
 unique(CarteraSegurosSimulada$Entidad1)
 which(CarteraSegurosSimulada$Entidad1==unique(CarteraSegurosSimulada$Entidad1)[32])
 ####Castigar no presenciales otros no hacer nada
@@ -184,12 +186,15 @@ X$RiesgoProducto = X$Grupo/7
 X$RiesgoProducto = ifelse(!is.na(X$RiesgoProducto),X$RiesgoProducto,1)
 ######################################
 ######################################
+X$Calif_comp  =calif
+X$Valuacion_I  =fecha_calif_1
+X$Valuacion_S  =fecha_calif_2
 ####Medida Global
 names(X)
-importanciaN = c("RiesgoCliente","RiesgoMonto_Num","RiesgoZONA_GEOGRAFICA","RiesgoProducto" )
-pesos  = c(4:1)
+importanciaN = c("RiesgoCliente","RiesgoMonto_Num","RiesgoZONA_GEOGRAFICA","RiesgoProducto","Calif_comp" )
+pesos  = c(5:1)
 pesos = pesos/sum(unique(pesos))
-EBR = as.matrix(X[,importanciaN],ncol=4)%*%as.matrix(pesos, ncol=1)
+EBR = as.matrix(X[,importanciaN],ncol=5)%*%as.matrix(pesos, ncol=1)
 EBR = as.data.frame(cbind(X,EBR))
 ################
 #####################
@@ -204,7 +209,7 @@ EBR_PREVIA = EBR_PREVIA%>%group_by(RFC)%>%
 summarise(EBR_F = max(EBR))%>% distinct()
 ##############Primer filtrado, cruzar solo con los factores de interés
 ##############Para cruzar por la izquierda
-EBR_1 = EBR%>%select(RFC,RiesgoCliente,RiesgoMonto_Num,RiesgoZONA_GEOGRAFICA,RiesgoProducto,EBR)%>%distinct
+EBR_1 = EBR%>%select(RFC,RiesgoCliente,RiesgoMonto_Num,RiesgoZONA_GEOGRAFICA,RiesgoProducto,Calif_comp,EBR)%>%distinct
 ###############Cruce por RFC y EBR_F
 EBR_PREVIA_DEF = EBR_PREVIA%>%left_join(EBR_1, by = c("RFC"="RFC","EBR_F"="EBR"))%>%distinct
 ######################Segundo filtrado si hubiera duplicados que por decimales
@@ -212,30 +217,28 @@ EBR_PREVIA_DEF = EBR_PREVIA%>%left_join(EBR_1, by = c("RFC"="RFC","EBR_F"="EBR")
 EBR_PREVIA_DEF <- EBR_PREVIA_DEF %>%
 distinct(RFC, EBR_F, .keep_all = TRUE)
 unique(EBR$RFC)
-#######################################
-#######################################
+############################################
+#############################################
 #OUTPUT FINAL EBR CONTIENE TODAS LAS EVALUACIONES
 ####EBR_PREVIA_DEF CONTIENE LAS EVALUACIONES POR CLIENTE.
 ############################
 #####Integración con calificación compañia
-EBR_PREVIA_DEF$Calif_comp  =calif
-EBR_PREVIA_DEF$Valuacion_I  =fecha_calif_1
-EBR_PREVIA_DEF$Valuacion_S  =fecha_calif_2
+#EBR_PREVIA_DEF$Calif_comp  =calif
+#EBR_PREVIA_DEF$Valuacion_I  =fecha_calif_1
+#EBR_PREVIA_DEF$Valuacion_S  =fecha_calif_2
+#EBR_PREVIA_DEF$Base = EBR_PREVIA_DEF$EBR_F + EBR_PREVIA_DEF$Calif_comp
 ###############################################################
 ###############################################################
-EBR_PREVIA_DEF$Base = EBR_PREVIA_DEF$EBR_F + EBR_PREVIA_DEF$Calif_comp
-###############################################################
-###############################################################
-EBR_PREVIA_DEF$alpha_Cliente = EBR_PREVIA_DEF$EBR_F/EBR_PREVIA_DEF$Base
-EBR_PREVIA_DEF$alpha_Comp = EBR_PREVIA_DEF$Calif_comp/EBR_PREVIA_DEF$Base
-EBR_PREVIA_DEF$CALIFI_COMP_EBR = (EBR_PREVIA_DEF$alpha_Cliente*EBR_PREVIA_DEF$EBR_F) + (EBR_PREVIA_DEF$alpha_Comp*EBR_PREVIA_DEF$Calif_comp)
-EBR_FINAL = EBR_PREVIA_DEF
+#EBR_PREVIA_DEF$alpha_Cliente = EBR_PREVIA_DEF$EBR_F/EBR_PREVIA_DEF$Base
+#EBR_PREVIA_DEF$alpha_Comp = EBR_PREVIA_DEF$Calif_comp/EBR_PREVIA_DEF$Base
+#EBR_PREVIA_DEF$CALIFI_COMP_EBR = (EBR_PREVIA_DEF$alpha_Cliente*EBR_PREVIA_DEF$EBR_F) + (EBR_PREVIA_DEF$alpha_Comp*EBR_PREVIA_DEF$Calif_comp)
+#EBR_FINAL = EBR_PREVIA_DEF
 #######################SE ALMACENA LA PRIMERA VALUACIÓN
 #####################MUY IMPORTANTE ANTES DE CONTINUAR
-EBR_FINAL$EBR_F_inicial = EBR_FINAL$EBR_F
-EBR_FINAL$EBR_F = EBR_FINAL$CALIFI_COMP_EBR
+#EBR_FINAL$EBR_F_inicial = EBR_FINAL$EBR_F
+#EBR_FINAL$EBR_F = EBR_FINAL$CALIFI_COMP_EBR
 #########Niveles finales
-EBR_FINAL = EBR_NIVELES(EBR_FINAL)
+EBR_FINAL = EBR_NIVELES2(EBR_PREVIA_DEF)
 #######################################
 #######################################
 #############################################
@@ -247,7 +250,7 @@ rutasalidas =  "C:/Users/agarciadeleon/OneDrive - SPPIS/Escritorio/EBR_ACCESO DI
 library(openxlsx)
 # Crear un workbook nuevo
 wb <- createWorkbook()
-df = data.frame(Calificacion = Calif,fecha_i = fecha_calif_1, fecha_f = fecha_calif_2)
+df = data.frame(Calificacion = calif,fecha_i = fecha_calif_1, fecha_f = fecha_calif_2)
 df$fecha_i = as.Date(df$fecha_i)
 df$fecha_f = as.Date( df$fecha_f)
 names(df) = c("Calificacion SPP", "fechaI", "fechaS")
@@ -298,4 +301,3 @@ Resultado = EBR%>%left_join(EBR_FINAL, by = c("RFC"="RFC"))
 library(writexl)
 ruta_destino = paste(trimws(rutasalidas,which = "right"),"/Resultado_clientes.xlsx", sep ="")
 write_xlsx(Resultado,ruta_destino)
-
